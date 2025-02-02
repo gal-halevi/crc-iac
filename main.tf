@@ -21,6 +21,7 @@ resource "aws_s3_object" "css_file" {
   bucket = aws_s3_bucket.resume-frontend-bucket.id
   source = "../frontend/styles.css"
   key    = "styles.css"
+  content_type = "text/css"
 }
 
 # Enable static website hosting
