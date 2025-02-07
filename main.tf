@@ -49,7 +49,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   enabled             = true
   default_root_object = "index.html"
   is_ipv6_enabled     = true
-  aliases             = ["mycrc.site"]
+  aliases             = local.all_domains
 
   restrictions {
     geo_restriction {
@@ -103,14 +103,15 @@ POLICY
 
 # Get a previously created hosted zone
 data "aws_route53_zone" "hosted_zone" {
-  name         = "mycrc.site"
+  name         = var.domain_name
   private_zone = false
 }
 
 # Create a public certificate
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "mycrc.site"
-  validation_method = "DNS"
+  domain_name               = var.domain_name
+  subject_alternative_names = local.alternate_domains
+  validation_method         = "DNS"
   lifecycle {
     create_before_destroy = true
   }
@@ -141,9 +142,10 @@ resource "aws_acm_certificate_validation" "cert" {
 
 # Create Route 53 alias record pointing to CloudFront
 resource "aws_route53_record" "cf_alias" {
-  zone_id = data.aws_route53_zone.hosted_zone.id
-  name    = "mycrc.site"
-  type    = "A"
+  for_each = toset(local.all_domains)
+  zone_id  = data.aws_route53_zone.hosted_zone.id
+  name     = each.value
+  type     = "A"
 
   alias {
     name                   = aws_cloudfront_distribution.s3_distribution.domain_name
