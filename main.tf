@@ -1,8 +1,3 @@
-# Create local for using experssion more than once
-locals {
-  s3_origin_id = "myS3Origin"
-}
-
 # Create S3 bucket for static website hosting
 resource "aws_s3_bucket" "resume-frontend-bucket" {
   bucket = "resume-frontend-bucket-xxssa"
