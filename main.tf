@@ -77,28 +77,28 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 # Add policy to S3 bucket for allowing CloudFront to use it
 resource "aws_s3_bucket_policy" "allow_cloudfront" {
   bucket = aws_s3_bucket.resume-frontend-bucket.id
-  policy = <<POLICY
-{
-"Version": "2008-10-17",
-"Id": "PolicyForCloudFrontPrivateContent",
-"Statement": [
+  policy = jsonencode(
     {
-        "Sid": "AllowCloudFrontServicePrincipal",
-        "Effect": "Allow",
-        "Principal": {
-            "Service": "cloudfront.amazonaws.com"
-        },
-        "Action": "s3:GetObject",
-        "Resource": "${aws_s3_bucket.resume-frontend-bucket.arn}/*",
-        "Condition": {
-            "StringEquals": {
-                "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
+      Version = "2012-10-17"
+      Id      = "PolicyForCloudFrontPrivateContent"
+      Statement = [
+        {
+          Sid    = "AllowCloudFrontServicePrincipal"
+          Effect = "Allow"
+          Principal = {
+            Service = "cloudfront.amazonaws.com"
+          }
+          Action   = "s3:GetObject"
+          Resource = "${aws_s3_bucket.resume-frontend-bucket.arn}/*"
+          Condition = {
+            StringEquals = {
+              "AWS:SourceArn" = aws_cloudfront_distribution.s3_distribution.arn
             }
+          }
         }
+      ]
     }
-]
-}
-POLICY
+  )
 }
 
 # Get a previously created hosted zone
