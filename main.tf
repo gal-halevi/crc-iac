@@ -38,6 +38,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   signing_protocol                  = "sigv4"
 }
 
+# Create CloudFront distribution for serving the static website
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name              = aws_s3_bucket.resume-frontend-bucket.bucket_regional_domain_name
@@ -48,6 +49,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   enabled             = true
   default_root_object = "index.html"
   is_ipv6_enabled     = true
+  aliases             = ["mycrc.site"]
 
   restrictions {
     geo_restriction {
@@ -57,7 +59,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   default_cache_behavior {
@@ -70,6 +74,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 }
 
+# Add policy to S3 bucket for allowing CloudFront to use it
 resource "aws_s3_bucket_policy" "allow_cloudfront" {
   bucket = aws_s3_bucket.resume-frontend-bucket.id
   policy = <<POLICY
@@ -94,4 +99,55 @@ resource "aws_s3_bucket_policy" "allow_cloudfront" {
 ]
 }
 POLICY
+}
+
+# Get a previously created hosted zone
+data "aws_route53_zone" "hosted_zone" {
+  name         = "mycrc.site"
+  private_zone = false
+}
+
+# Create a public certificate
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "mycrc.site"
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Add certificate records to the hosted zone
+resource "aws_route53_record" "cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  zone_id = data.aws_route53_zone.hosted_zone.zone_id
+  name    = each.value.name
+  records = [each.value.record]
+  type    = each.value.type
+  ttl     = 60
+}
+
+# Validate the certificate
+resource "aws_acm_certificate_validation" "cert" {
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+}
+
+# Create Route 53 alias record pointing to CloudFront
+resource "aws_route53_record" "cf_alias" {
+  zone_id = data.aws_route53_zone.hosted_zone.id
+  name    = "mycrc.site"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
