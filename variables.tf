@@ -4,5 +4,5 @@ variable "domain_name" {
 
 variable "domain_prefix" {
   type        = list(string)
-  description = "value for granted"
+  description = "Domain prefix to serve. e.g. www, mail, etc..."
 }
