@@ -1,8 +1,3 @@
-# Create local for using experssion more than once
-locals {
-  s3_origin_id = "myS3Origin"
-}
-
 # Create S3 bucket for static website hosting
 resource "aws_s3_bucket" "resume-frontend-bucket" {
   bucket = "resume-frontend-bucket-xxssa"
@@ -38,6 +33,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   signing_protocol                  = "sigv4"
 }
 
+# Create CloudFront distribution for serving the static website
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name              = aws_s3_bucket.resume-frontend-bucket.bucket_regional_domain_name
@@ -48,6 +44,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   enabled             = true
   default_root_object = "index.html"
   is_ipv6_enabled     = true
+  aliases             = local.all_domains
 
   restrictions {
     geo_restriction {
@@ -57,7 +54,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   default_cache_behavior {
@@ -70,28 +69,82 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 }
 
+# Add policy to S3 bucket for allowing CloudFront to use it
 resource "aws_s3_bucket_policy" "allow_cloudfront" {
   bucket = aws_s3_bucket.resume-frontend-bucket.id
-  policy = <<POLICY
-{
-"Version": "2008-10-17",
-"Id": "PolicyForCloudFrontPrivateContent",
-"Statement": [
+  policy = jsonencode(
     {
-        "Sid": "AllowCloudFrontServicePrincipal",
-        "Effect": "Allow",
-        "Principal": {
-            "Service": "cloudfront.amazonaws.com"
-        },
-        "Action": "s3:GetObject",
-        "Resource": "${aws_s3_bucket.resume-frontend-bucket.arn}/*",
-        "Condition": {
-            "StringEquals": {
-                "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
+      Version = "2012-10-17"
+      Id      = "PolicyForCloudFrontPrivateContent"
+      Statement = [
+        {
+          Sid    = "AllowCloudFrontServicePrincipal"
+          Effect = "Allow"
+          Principal = {
+            Service = "cloudfront.amazonaws.com"
+          }
+          Action   = "s3:GetObject"
+          Resource = "${aws_s3_bucket.resume-frontend-bucket.arn}/*"
+          Condition = {
+            StringEquals = {
+              "AWS:SourceArn" = aws_cloudfront_distribution.s3_distribution.arn
             }
+          }
         }
+      ]
     }
-]
+  )
 }
-POLICY
+
+# Get a previously created hosted zone
+data "aws_route53_zone" "hosted_zone" {
+  name         = var.domain_name
+  private_zone = false
+}
+
+# Create a public certificate
+resource "aws_acm_certificate" "cert" {
+  domain_name               = var.domain_name
+  subject_alternative_names = local.alternate_domains
+  validation_method         = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Add certificate records to the hosted zone
+resource "aws_route53_record" "cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  zone_id = data.aws_route53_zone.hosted_zone.zone_id
+  name    = each.value.name
+  records = [each.value.record]
+  type    = each.value.type
+  ttl     = 60
+}
+
+# Validate the certificate
+resource "aws_acm_certificate_validation" "cert" {
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+}
+
+# Create Route 53 alias record pointing to CloudFront
+resource "aws_route53_record" "cf_alias" {
+  for_each = toset(local.all_domains)
+  zone_id  = data.aws_route53_zone.hosted_zone.id
+  name     = each.value
+  type     = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
 }

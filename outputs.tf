@@ -1,3 +1,3 @@
-output "cloudfront_url" {
-  value = "http://${aws_cloudfront_distribution.s3_distribution.domain_name}"
+output "cloudfront_urls" {
+  value = [for domain in aws_cloudfront_distribution.s3_distribution.aliases : "https://${domain}"]
 }
