@@ -1,8 +1,24 @@
+variable "bucket_name" {
+  type = string
+}
+
+variable "web_assets_path" {
+  type = string
+}
+
+variable "env" {
+  type        = string
+  description = "Environment type: prod/stg"
+}
+
 variable "domain_name" {
   type = string
 }
 
-variable "domain_prefix" {
-  type        = list(string)
-  description = "Domain prefix to serve. e.g. www, mail, etc..."
+variable "alternate_domains" {
+  type = list(string)
+}
+
+variable "default_root_object" {
+  type = string
 }
