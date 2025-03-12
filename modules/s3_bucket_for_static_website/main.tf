@@ -7,6 +7,13 @@ resource "aws_s3_bucket" "s3-bucket" {
   }
 }
 
+resource "aws_s3_object" "frontend_config" {
+  bucket       = aws_s3_bucket.s3-bucket.id
+  key          = "config.json"
+  source       = "${var.web_assets_path}/config.json" # TODO: need to fix this hardcoded value inside module
+  content_type = "application/json"
+}
+
 # Upload website files
 resource "aws_s3_object" "website_assets" {
   bucket       = aws_s3_bucket.s3-bucket.id
