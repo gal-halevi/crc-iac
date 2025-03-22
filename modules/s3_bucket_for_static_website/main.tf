@@ -12,6 +12,7 @@ resource "aws_s3_object" "frontend_config" {
   key          = "config.json"
   source       = "${var.web_assets_path}/config.json" # TODO: need to fix this hardcoded value inside module
   content_type = "application/json"
+  depends_on   = [aws_iam_role_policy_attachment.attach-s3-policy]
 }
 
 # Upload website files
