@@ -21,6 +21,7 @@ resource "aws_s3_object" "website_assets" {
   source       = "${var.web_assets_path}/${each.value}"
   key          = each.value
   content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.value), "application/octet-stream")
+  depends_on   = [aws_iam_role_policy_attachment.attach-s3-policy]
 }
 
 # Add policy to S3 bucket for allowing CloudFront to use it
