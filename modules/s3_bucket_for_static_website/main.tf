@@ -49,26 +49,3 @@ resource "aws_s3_bucket_policy" "allow_cloudfront" {
     }
   )
 }
-
-data "aws_iam_policy_document" "s3-required-policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:PutObject",
-      "s3:DeleteObject"
-    ]
-    resources = ["${aws_s3_bucket.s3-bucket.arn}/*"]
-  }
-}
-
-resource "aws_iam_policy" "s3-frontend_policy" {
-  name        = "s3-frontend-policy"
-  description = "Policy used for frotned S3"
-  policy      = data.aws_iam_policy_document.s3-required-policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "attach-s3-policy" {
-  role       = "arn:aws:iam::940482453420:role/oidc_frontend_role"
-  policy_arn = aws_iam_policy.s3-frontend_policy.arn
-}
