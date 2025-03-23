@@ -1,7 +1,3 @@
-variable "role_arn" {
-  type = string
-}
-
 variable "table_name" {
 
 }
