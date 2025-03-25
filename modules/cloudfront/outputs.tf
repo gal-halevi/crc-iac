@@ -13,3 +13,7 @@ output "hosted_zone_id" {
 output "cloudfront_urls" {
   value = [for domain in aws_cloudfront_distribution.s3_distribution.aliases : "https://${domain}"]
 }
+
+output "distribution_id" {
+  value = aws_cloudfront_distribution.s3_distribution.id
+}
