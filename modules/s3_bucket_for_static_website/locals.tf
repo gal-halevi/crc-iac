@@ -6,8 +6,8 @@ locals {
     ".jpg"  = "image/jpeg"
     ".jpeg" = "image/jpeg"
     ".pdf"  = "application/pdf"
-    ".json" = "application/json"
-    ".js"   = "application/javascript"
-    ".gif"  = "image/gif"
+    ".json"  = "application/json"
+    ".js"    = "application/javascript"
+    ".gif"   = "image/gif"
   }
 }
