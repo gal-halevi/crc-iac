@@ -7,22 +7,13 @@ data "terraform_remote_state" "backend" {
   }
 }
 
-resource "local_file" "frontend_config" {
-  filename = local.config_json_path
-  content = jsonencode({
-    apiUrl     = data.terraform_remote_state.backend.outputs.apiUrl
-    tableName  = data.terraform_remote_state.backend.outputs.tableName
-    primaryKey = data.terraform_remote_state.backend.outputs.primaryKey
-  })
-}
-
 module "s3" {
   source                      = "../modules/s3_bucket_for_static_website"
   bucket_name                 = var.bucket_name
   web_assets_path             = var.web_assets_path
   cloudfront_distribution_arn = module.cloudfront.cloudfront_distribution_arn
+  config_json                 = local.config_json
   env                         = var.env
-  depends_on                  = [local_file.frontend_config]
 }
 
 module "cloudfront" {

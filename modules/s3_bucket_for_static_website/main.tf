@@ -10,8 +10,9 @@ resource "aws_s3_bucket" "s3-bucket" {
 resource "aws_s3_object" "frontend_config" {
   bucket       = aws_s3_bucket.s3-bucket.id
   key          = "config.json"
-  source       = "${var.web_assets_path}/config.json" # TODO: need to fix this hardcoded value inside module
+  content      = var.config_json
   content_type = "application/json"
+  etag         = md5(var.config_json)
 }
 
 # Upload website files
@@ -21,6 +22,7 @@ resource "aws_s3_object" "website_assets" {
   source       = "${var.web_assets_path}/${each.value}"
   key          = each.value
   content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.value), "application/octet-stream")
+  etag         = md5("${var.web_assets_path}/${each.value}")
 }
 
 # Add policy to S3 bucket for allowing CloudFront to use it

@@ -11,6 +11,10 @@ variable "web_assets_path" {
   type        = string
 }
 
+variable "config_json" {
+  description = "config.json content"
+}
+
 variable "cloudfront_distribution_arn" {
   type = string
 }
