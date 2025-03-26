@@ -22,7 +22,7 @@ resource "aws_s3_object" "website_assets" {
   source       = "${var.web_assets_path}/${each.value}"
   key          = each.value
   content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.value), "application/octet-stream")
-  etag         = md5("${var.web_assets_path}/${each.value}")
+  etag         = filemd5("${var.web_assets_path}/${each.value}")
 }
 
 # Add policy to S3 bucket for allowing CloudFront to use it
