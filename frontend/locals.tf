@@ -5,5 +5,4 @@ locals {
     tableName  = data.terraform_remote_state.backend.outputs.tableName
     primaryKey = data.terraform_remote_state.backend.outputs.primaryKey
   })
-  config_json_path = "${var.web_assets_path}/config.json"
 }
