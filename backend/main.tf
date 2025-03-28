@@ -1,6 +1,6 @@
 module "dynamodb" {
   source      = "../modules/dynamodb_table"
-  table_name  = "var.table_name-${var.env}"
+  table_name  = "${var.table_name}-${var.env}"
   primary_key = var.primary_key
   env         = var.env
 }
