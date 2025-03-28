@@ -1,6 +1,6 @@
 # Create an OAC (Origin Access Control) for CloudFront
 resource "aws_cloudfront_origin_access_control" "oac" {
-  name                              = "my-cloudfront-oac-${var.env}"
+  name                              = "crc-oac-${var.env}"
   description                       = "OAC for S3 bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"

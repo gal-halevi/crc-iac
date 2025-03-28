@@ -1,7 +1,7 @@
 data "terraform_remote_state" "backend" {
   backend = "s3"
   config = {
-    bucket = "crc-tf-state-bucket-iac"
+    bucket = "crc-tf-state-bucket-iac-${var.env}"
     key    = "backendend.tfstate"
     region = "us-east-1"
   }
@@ -9,7 +9,7 @@ data "terraform_remote_state" "backend" {
 
 module "s3" {
   source                      = "../modules/s3_bucket_for_static_website"
-  bucket_name                 = var.bucket_name
+  bucket_name                 = "${var.bucket_name}-${var.env}"
   web_assets_path             = var.web_assets_path
   cloudfront_distribution_arn = module.cloudfront.cloudfront_distribution_arn
   config_json                 = local.config_json
@@ -32,6 +32,7 @@ module "route53" {
   domain_list               = local.domain_list
   cloudfront_domain         = module.cloudfront.domain_name
   cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
+  env                       = var.env
 }
 
 module "certificate" {
