@@ -5,3 +5,7 @@ variable "table_name" {
 variable "primary_key" {
   description = "Primary key to use"
 }
+
+variable "env" {
+
+}

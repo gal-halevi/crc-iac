@@ -29,3 +29,7 @@ variable "api_route_key" {
 variable "api_cors_allowed_origins" {
   type = list(string)
 }
+
+variable "env" {
+  type = string
+}

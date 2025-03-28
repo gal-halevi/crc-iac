@@ -6,6 +6,9 @@ resource "aws_apigatewayv2_api" "lambda_api" {
   cors_configuration {
     allow_origins = var.cors_allowed_origins
   }
+  tags = {
+    Environment = var.env
+  }
 }
 
 # API Gateway V2 Stage (Auto Deploy Enabled)
@@ -13,6 +16,9 @@ resource "aws_apigatewayv2_stage" "http_stage" {
   api_id      = aws_apigatewayv2_api.lambda_api.id
   name        = local.stage
   auto_deploy = true
+  tags = {
+    Environment = var.env
+  }
 }
 
 # API Gateway V2 Integration with Lambda

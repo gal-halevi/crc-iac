@@ -15,6 +15,10 @@ variable "lambda_function_name" {
 }
 
 variable "cors_allowed_origins" {
-  type = list(string)
+  type        = list(string)
   description = "List of CORS allowed origins to set for the api gateway"
+}
+
+variable "env" {
+  type = string
 }
