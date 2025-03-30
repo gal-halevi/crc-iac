@@ -13,3 +13,7 @@ variable "handler" {
 variable "dynamodb_table_arn" {
   description = "DynamoDB table ARN"
 }
+
+variable "env" {
+
+}

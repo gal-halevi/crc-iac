@@ -16,3 +16,7 @@ variable "cloudfront_domain" {
 variable "cloudfront_hosted_zone_id" {
   type = string
 }
+
+variable "env" {
+  type = string
+}

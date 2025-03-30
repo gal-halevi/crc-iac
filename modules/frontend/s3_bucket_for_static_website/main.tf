@@ -13,6 +13,9 @@ resource "aws_s3_object" "frontend_config" {
   content      = var.config_json
   content_type = "application/json"
   etag         = md5(var.config_json)
+  tags = {
+    Environment = var.env
+  }
 }
 
 # Upload website files
@@ -23,6 +26,9 @@ resource "aws_s3_object" "website_assets" {
   key          = each.value
   content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.value), "application/octet-stream")
   etag         = filemd5("${var.web_assets_path}/${each.value}")
+  tags = {
+    Environment = var.env
+  }
 }
 
 # Add policy to S3 bucket for allowing CloudFront to use it

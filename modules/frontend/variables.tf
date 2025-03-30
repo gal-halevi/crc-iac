@@ -1,24 +1,24 @@
 variable "bucket_name" {
-  type = string
+  default = "crc-frontend"
 }
 
 variable "web_assets_path" {
-  type = string
+  default = "../../../frontend/src"
 }
 
 variable "env" {
   type        = string
-  description = "Environment type: prod/stg"
 }
 
 variable "domain_name" {
-  type = string
+  default = "mycrc.site"
 }
 
 variable "alternate_domains" {
   type = list(string)
+  default = ["my.mycrc.site", "www.mycrc.site"]
 }
 
 variable "default_root_object" {
-  type = string
+  default = "html/index.html"
 }

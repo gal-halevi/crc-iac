@@ -3,7 +3,7 @@ output "apiUrl" {
 }
 
 output "tableName" {
-  value = var.table_name
+  value = "${var.table_name}-${var.env}"
 }
 
 output "primaryKey" {

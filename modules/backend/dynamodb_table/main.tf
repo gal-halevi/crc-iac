@@ -7,4 +7,7 @@ resource "aws_dynamodb_table" "table" {
     name = var.primary_key
     type = "S"
   }
+  tags = {
+    Environment = var.env
+  }
 }

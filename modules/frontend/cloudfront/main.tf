@@ -1,6 +1,6 @@
 # Create an OAC (Origin Access Control) for CloudFront
 resource "aws_cloudfront_origin_access_control" "oac" {
-  name                              = "my-cloudfront-oac-${var.env}"
+  name                              = "crc-oac-${var.env}"
   description                       = "OAC for S3 bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
@@ -27,10 +27,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
   }
 
+  # Explicit viewer_certificate block
   viewer_certificate {
-    acm_certificate_arn      = var.certificate_arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
+    acm_certificate_arn      = var.env == "prod" ? var.certificate_arn : null
+    ssl_support_method       = var.env == "prod" ? "sni-only" : null
+    minimum_protocol_version = var.env == "prod" ? "TLSv1.2_2021" : null
+    cloudfront_default_certificate = var.env == "prod" ? false : true
   }
 
   default_cache_behavior {
