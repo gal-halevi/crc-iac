@@ -11,7 +11,7 @@ output "hosted_zone_id" {
 }
 
 output "cloudfront_urls" {
-  value = [for domain in aws_cloudfront_distribution.s3_distribution.aliases : "https://${domain}"]
+  value = var.env == "prod" ? [for domain in aws_cloudfront_distribution.s3_distribution.aliases : "https://${domain}"] : [aws_cloudfront_distribution.s3_distribution.domain_name]
 }
 
 output "distribution_id" {
