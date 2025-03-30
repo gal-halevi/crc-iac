@@ -7,7 +7,7 @@ variable "primary_key" {
 }
 
 variable "source_file_path" {
-  default = "../../../backend/lambda_visitor_counter.py"
+  type = string
 }
 
 variable "lambda_name" {
