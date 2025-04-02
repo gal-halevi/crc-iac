@@ -1,7 +1,7 @@
 module "backend" {
   source           = "../../modules/backend"
   env              = "prod"
-  source_file_path = "../../../backend/lambda_visitor_counter.py"
+  source_file_path = var.source_file_path
 }
 
 output "apiUrl" {
