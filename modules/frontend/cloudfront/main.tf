@@ -29,9 +29,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   # Explicit viewer_certificate block
   viewer_certificate {
-    acm_certificate_arn      = var.env == "prod" ? var.certificate_arn : null
-    ssl_support_method       = var.env == "prod" ? "sni-only" : null
-    minimum_protocol_version = var.env == "prod" ? "TLSv1.2_2021" : null
+    acm_certificate_arn            = var.env == "prod" ? var.certificate_arn : null
+    ssl_support_method             = var.env == "prod" ? "sni-only" : null
+    minimum_protocol_version       = var.env == "prod" ? "TLSv1.2_2021" : null
     cloudfront_default_certificate = var.env == "prod" ? false : true
   }
 

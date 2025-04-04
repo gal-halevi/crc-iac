@@ -6,5 +6,5 @@ output "cloudfront_dist_id" {
 }
 
 output "BE_api_url" {
-  value = data.terraform_remote_state.backend.outputs.apiUrl
+  value = module.be_data.be_outputs.apiUrl
 }

@@ -7,7 +7,7 @@ variable "web_assets_path" {
 }
 
 variable "env" {
-  type        = string
+  type = string
 }
 
 variable "domain_name" {
@@ -15,7 +15,7 @@ variable "domain_name" {
 }
 
 variable "alternate_domains" {
-  type = list(string)
+  type    = list(string)
   default = ["my.mycrc.site", "www.mycrc.site"]
 }
 
